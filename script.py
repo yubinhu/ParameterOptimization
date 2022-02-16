@@ -88,16 +88,7 @@ class Venus:
         Pext = venus.read(['ext_mbar'])         # pressure just outside source [torr]
         HHe = venus.read(['four_k_heater_power'])   # liquid He heater power [W]
 
-        # TODO: write to database
-
-    @staticmethod
-    def _himmelblau4(w, x, y):
-        """A funky 4 dimensional parameter space with a bunch of local minima."""
-        return (
-            (w**2 + x + y - 11)**2 +
-            (w + x**2 + y - 7)**2 +
-            (w + x + y**2 - 5)**2
-        )
+        # TODO: write to database or somewhere
 
 venus = Venus()
 
@@ -106,11 +97,18 @@ venus = Venus()
 # Define the black box function to optimize.
 def black_box_function(A, B, C):
     venus.set_mag_currents(A, B, C)
-    t_end = time.time() + 3 * 60 # wait for 3min
+    t_end = time.time() + 5 * 60 # wait for 5min
     while time.time() < t_end:
         venus.monitor()
-    v = venus.get_beam_current()
-    return v
+
+    t_end = time.time() + 10 # data acquisition for 10s
+    v_list = []
+    while time.time() < t_end:
+        v = venus.get_beam_current()
+        v_list.append(v)
+    v_mean = sum(v_list) / len(v_list)
+    # save the v list?
+    return v_mean
 
 pbounds = {"A": (175, 185), "B": (145, 155), "C": (135, 145)}
 
@@ -118,3 +116,4 @@ optimizer = BayesianOptimization(f = black_box_function, pbounds = pbounds, verb
 noise = venus.get_noise_level()
 optimizer.maximize(init_points = 5, n_iter = 30, kappa=4.2, alpha=noise**2) # 
 print("Best result: {}; f(x) = {}.".format(optimizer.max["params"], optimizer.max["target"]))
+
