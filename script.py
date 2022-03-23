@@ -73,7 +73,7 @@ class Venus:
         """Read the current value of the beam current"""
         venus = self.venus
         Ifc = venus.read(['fcv1_i'])*1e6    # faraday cup current (single species current) in microamps
-        return self._rescale_output(Ifc)
+        return Ifc
 
     def monitor(self):
         venus = self.venus
@@ -92,10 +92,15 @@ class Venus:
 
 venus = Venus()
 
-
+CURR_TARGET = 100
 
 # Define the black box function to optimize.
 def black_box_function(A, B, C):
+    
+    # add terminating condition
+    if venus.get_beam_current() > CURR_TARGET:
+        return 0
+    
     venus.set_mag_currents(A, B, C)
     t_end = time.time() + 5 * 60 # wait for 5min
     while time.time() < t_end:
