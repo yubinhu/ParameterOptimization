@@ -119,6 +119,6 @@ pbounds = {"A": (175, 185), "B": (145, 155), "C": (135, 145)}
 
 optimizer = BayesianOptimization(f = black_box_function, pbounds = pbounds, verbose = 1)
 noise = venus.get_noise_level()
-optimizer.maximize(init_points = 5, n_iter = 30, kappa=4.2, alpha=noise**2) # 
+optimizer.maximize(init_points = 5, n_iter = 30, kappa=2.3, alpha=noise**2) # 
 print("Best result: {}; f(x) = {}.".format(optimizer.max["params"], optimizer.max["target"]))
 
